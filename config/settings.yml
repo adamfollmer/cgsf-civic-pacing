@@ -1,0 +1,26 @@
+plugins:
+  civic_pacing_enabled:
+    default: false
+    client: false
+  civic_pacing_paced_categories:
+    default: ""
+    type: category_list
+    client: false
+  civic_pacing_topic_budget:
+    default: 1
+    min: 1
+  civic_pacing_topic_window_days:
+    default: 5
+    min: 1
+  civic_pacing_reply_budget:
+    default: 2
+    min: 1
+  civic_pacing_reply_window_days:
+    default: 5
+    min: 1
+  civic_pacing_like_budget:
+    default: 4
+    min: 1
+  civic_pacing_like_window_days:
+    default: 5
+    min: 1

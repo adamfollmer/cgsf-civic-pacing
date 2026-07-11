@@ -1,0 +1,15 @@
+en:
+  site_settings:
+    civic_pacing_enabled: "Enable token-budget pacing in designated categories. Every member gets the same rolling budget; staff are exempt (visibly)."
+    civic_pacing_paced_categories: "Categories where posting/liking spends from members' token budgets. Actions everywhere else are unlimited."
+    civic_pacing_topic_budget: "New topics a member may create across all paced categories, per rolling window"
+    civic_pacing_topic_window_days: "Rolling window (days) for the new-topic budget"
+    civic_pacing_reply_budget: "Replies a member may post across all paced categories, per rolling window"
+    civic_pacing_reply_window_days: "Rolling window (days) for the reply budget"
+    civic_pacing_like_budget: "Likes a member may give across all paced categories, per rolling window"
+    civic_pacing_like_window_days: "Rolling window (days) for the like budget"
+  civic_pacing:
+    limit_reached:
+      topic: "You've used your %{count} new-topic token(s) for now — one frees up in about %{hours} hour(s). Civic topics are rationed so every voice carries the same weight."
+      reply: "You've used your %{count} reply token(s) for now — one frees up in about %{hours} hour(s). Slower conversations here are by design."
+      like: "You've used your %{count} support token(s) for now — one frees up in about %{hours} hour(s). Scarce support means support that says something."
