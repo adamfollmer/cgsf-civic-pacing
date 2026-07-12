@@ -9,6 +9,8 @@
 
 enabled_site_setting :civic_pacing_enabled
 
+register_asset "stylesheets/civic-pacing.scss"
+
 after_initialize do
   class ::CivicPacingEvent < ::ActiveRecord::Base
     self.table_name = "civic_pacing_events"
@@ -63,6 +65,41 @@ after_initialize do
         I18n.t("civic_pacing.limit_reached.#{action}", count: budget(action), hours: hours),
       )
     end
+  end
+
+  # --- Member-facing token status (the June design's my_cooldowns, reborn) ---
+
+  class ::CgsfCivicPacing::StatusController < ::ApplicationController
+    requires_plugin "cgsf-civic-pacing"
+    before_action :ensure_logged_in
+
+    def show
+      actions = ::CgsfCivicPacing::ACTIONS.keys.to_h do |action|
+        budget = ::CgsfCivicPacing.budget(action)
+        used = ::CgsfCivicPacing.in_window(current_user, action).count
+        remaining = [budget - used, 0].max
+        [
+          action,
+          {
+            budget: budget,
+            remaining: remaining,
+            window_days: SiteSetting.get(::CgsfCivicPacing::ACTIONS[action][1]),
+            next_token_at:
+              remaining.zero? ? ::CgsfCivicPacing.next_token_at(current_user, action).iso8601 : nil,
+          },
+        ]
+      end
+
+      render json: {
+        actions: actions,
+        paced_category_ids: SiteSetting.civic_pacing_paced_categories.split("|").map(&:to_i),
+        exempt: ::CgsfCivicPacing.exempt?(current_user),
+      }
+    end
+  end
+
+  Discourse::Application.routes.append do
+    get "/civic-pacing/status" => "cgsf_civic_pacing/status#show"
   end
 
   # --- Guards (validation-time) ---

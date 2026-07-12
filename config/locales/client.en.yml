@@ -1,0 +1,12 @@
+en:
+  js:
+    civic_pacing:
+      banner:
+        topics_left:
+          one: "⏳ Paced category — you have %{count} new topic left this week."
+          other: "⏳ Paced category — you have %{count} new topics left this week."
+        topics_none: "⏳ Paced category — you're out of new-topic tokens; the next one frees up in about %{hours}h."
+        replies_left:
+          one: "⏳ Paced category — you have %{count} reply left this week."
+          other: "⏳ Paced category — you have %{count} replies left this week."
+        replies_none: "⏳ Paced category — you're out of reply tokens; the next one frees up in about %{hours}h."
