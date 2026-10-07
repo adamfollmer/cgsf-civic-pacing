@@ -8,8 +8,11 @@ en:
     civic_pacing_reply_window_days: "Rolling window (days) for the reply budget"
     civic_pacing_like_budget: "Likes a member may give across all paced categories, per rolling window"
     civic_pacing_like_window_days: "Rolling window (days) for the like budget"
+    civic_pacing_shared_post_budget: "New topics and replies spend from ONE shared post budget, sized by the new-topic budget and window settings. The reply budget settings are ignored while this is on."
+    civic_pacing_pace_likes: "Also pace likes (Support) in paced categories. Off = Support is unlimited."
   civic_pacing:
     limit_reached:
       topic: "You've used your %{count} new-topic token(s) for now — one frees up in about %{hours} hour(s). Civic topics are rationed so every voice carries the same weight."
       reply: "You've used your %{count} reply token(s) for now — one frees up in about %{hours} hour(s). Slower conversations here are by design."
+      post: "You've used your post for this week on the open boards. You can post again on %{date}."
       like: "You've used your %{count} support token(s) for now — one frees up in about %{hours} hour(s). Scarce support means support that says something."

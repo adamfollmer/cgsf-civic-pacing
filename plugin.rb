@@ -34,12 +34,20 @@ after_initialize do
       user.nil? || user.id < 1 || user.staff?
     end
 
-    def self.budget(action) = SiteSetting.get(ACTIONS[action][0])
-    def self.window(action) = SiteSetting.get(ACTIONS[action][1]).days
+    POST_ACTIONS = %w[topic reply]
+
+    # Shared mode: starting a topic and replying spend from one pool (a new
+    # conversation is still a post), sized by the new-topic settings.
+    def self.shared?(action) =
+      SiteSetting.civic_pacing_shared_post_budget && POST_ACTIONS.include?(action)
+    def self.settings_for(action) = shared?(action) ? ACTIONS["topic"] : ACTIONS[action]
+    def self.budget(action) = SiteSetting.get(settings_for(action)[0])
+    def self.window_days(action) = SiteSetting.get(settings_for(action)[1])
+    def self.window(action) = window_days(action).days
 
     def self.in_window(user, action)
       CivicPacingEvent
-        .where(user_id: user.id, action: action)
+        .where(user_id: user.id, action: shared?(action) ? POST_ACTIONS : action)
         .where("created_at > ?", window(action).ago)
     end
 
@@ -59,6 +67,10 @@ after_initialize do
     end
 
     def self.deny!(record, user, action)
+      if shared?(action)
+        date = next_token_at(user, action).strftime("%A, %B %-d")
+        return record.errors.add(:base, I18n.t("civic_pacing.limit_reached.post", date: date))
+      end
       hours = ((next_token_at(user, action) - Time.zone.now) / 1.hour).ceil.clamp(1, 24 * 365)
       record.errors.add(
         :base,
@@ -83,7 +95,7 @@ after_initialize do
           {
             budget: budget,
             remaining: remaining,
-            window_days: SiteSetting.get(::CgsfCivicPacing::ACTIONS[action][1]),
+            window_days: ::CgsfCivicPacing.window_days(action),
             next_token_at:
               remaining.zero? ? ::CgsfCivicPacing.next_token_at(current_user, action).iso8601 : nil,
           },
@@ -94,6 +106,7 @@ after_initialize do
         actions: actions,
         paced_category_ids: SiteSetting.civic_pacing_paced_categories.split("|").map(&:to_i),
         exempt: ::CgsfCivicPacing.exempt?(current_user),
+        shared_post_budget: SiteSetting.civic_pacing_shared_post_budget,
       }
     end
   end
@@ -127,6 +140,7 @@ after_initialize do
   add_model_callback(:post_action, :validate) do
     next unless SiteSetting.civic_pacing_enabled
     next unless new_record?
+    next unless SiteSetting.civic_pacing_pace_likes
     next unless post_action_type_id == PostActionType.types[:like]
     next unless ::CgsfCivicPacing.paced_category?(post&.topic&.category_id)
     next if ::CgsfCivicPacing.exempt?(user)
@@ -154,6 +168,7 @@ after_initialize do
 
   on(:like_created) do |post_action|
     next unless SiteSetting.civic_pacing_enabled
+    next unless SiteSetting.civic_pacing_pace_likes
     user = post_action.user
     next unless ::CgsfCivicPacing.paced_category?(post_action.post&.topic&.category_id)
     next if ::CgsfCivicPacing.exempt?(user)

@@ -9,4 +9,8 @@ en:
         replies_left:
           one: "⏳ Paced category — you have %{count} reply left this week."
           other: "⏳ Paced category — you have %{count} replies left this week."
+        posts_left:
+          one: "You can post once more this week on the open boards."
+          other: "You can post %{count} more times this week on the open boards."
+        posts_none: "You've used your post for this week on the open boards. You can post again on %{date}."
         replies_none: "⏳ Paced category — you're out of reply tokens; the next one frees up in about %{hours}h."

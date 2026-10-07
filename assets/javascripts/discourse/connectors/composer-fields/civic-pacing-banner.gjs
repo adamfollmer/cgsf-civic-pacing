@@ -40,6 +40,20 @@ export default class CivicPacingBanner extends Component {
   get line() {
     const creating = this.args.outletArgs.model?.creatingTopic;
     const a = this.status.actions[creating ? "topic" : "reply"];
+
+    // Shared mode: one weekly post, whether it starts a topic or replies.
+    if (this.status.shared_post_budget) {
+      if (a.remaining > 0) {
+        return i18n("civic_pacing.banner.posts_left", { count: a.remaining });
+      }
+      const date = new Date(a.next_token_at).toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      });
+      return i18n("civic_pacing.banner.posts_none", { date });
+    }
+
     const kind = creating ? "topics" : "replies";
 
     if (a.remaining > 0) {

@@ -104,6 +104,49 @@ RSpec.describe "cgsf-civic-pacing" do
     end
   end
 
+  describe "shared post budget (a new conversation is still a post)" do
+    before do
+      SiteSetting.civic_pacing_shared_post_budget = true
+      SiteSetting.civic_pacing_topic_budget = 1
+      SiteSetting.civic_pacing_topic_window_days = 7
+      SiteSetting.civic_pacing_pace_likes = false
+    end
+
+    it "blocks a reply after starting a topic" do
+      topic = make_topic(poster, paced_category).post.topic
+      expect(make_topic(member, paced_category).errors).to be_blank
+      reply = make_reply(member, topic)
+      expect(reply.errors.full_messages.join).to include("You've used your post for this week")
+    end
+
+    it "blocks a new topic after replying" do
+      topic = make_topic(poster, paced_category).post.topic
+      expect(make_reply(member, topic).errors).to be_blank
+      expect(make_topic(member, paced_category).errors.full_messages.join).to include("You can post again on")
+    end
+
+    it "reopens after the window" do
+      make_topic(member, paced_category)
+      freeze_time 7.days.from_now + 1.minute
+      expect(make_topic(member, paced_category).errors).to be_blank
+    end
+
+    it "leaves unpaced categories and staff alone" do
+      make_topic(member, paced_category)
+      expect(make_topic(member, free_category).errors).to be_blank
+      2.times { |i| expect(make_topic(admin, paced_category, "s#{i}").errors).to be_blank }
+    end
+
+    it "leaves Support unlimited when likes are not paced" do
+      topic = make_topic(poster, paced_category).post.topic
+      3.times do
+        other = Fabricate(:post, topic: topic, user: admin)
+        PostActionCreator.like(member, other)
+      end
+      expect(CivicPacingEvent.where(user_id: member.id, action: "like").count).to eq(0)
+    end
+  end
+
   describe "kill switch" do
     it "does nothing when disabled" do
       SiteSetting.civic_pacing_enabled = false

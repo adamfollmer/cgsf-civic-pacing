@@ -24,3 +24,7 @@ plugins:
   civic_pacing_like_window_days:
     default: 5
     min: 1
+  civic_pacing_shared_post_budget:
+    default: false
+  civic_pacing_pace_likes:
+    default: true
